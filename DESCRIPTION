@@ -1,0 +1,13 @@
+Package: yg
+Type: Package
+Title: File based database management.
+Version: 0.1.0
+Author: Guang Yang
+Maintainer: Guang Yang <gyang274@gmail.com>
+Description: File based database management.
+License: MIT + file LICENSE
+LazyData: TRUE
+Depends: data.table,
+    magrittr,
+    RSQLite,
+    RODBC
