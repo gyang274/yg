@@ -744,7 +744,7 @@ sqodbc_existsqtb <- function(tb, db, tb_type = c("table", "view"), ...) {
 
 }
 
-#' fetchsqtb wrapper on sqlFetch
+#' sqodbc_fetchsqtb wrapper on sqlFetch
 sqodbc_fetchsqtb <- function(tb, db, ...) {
 
   message("fetch table: ", substitute(tb), " from ", substitute(db), " ...\n")
@@ -772,8 +772,10 @@ sqodbc_fetchsqtb <- function(tb, db, ...) {
   return(x)
 }
 
-#' uploadrdt wrapper on sqlSave
-sqodbc_uploadrdt <- function(dt, tb, db, rownames = FALSE, colnames = FALSE,
+#' sqodbc_uploadrdt wrapper on sqlSave
+#' make sqodbc_uploadrdt wrapper on bcp_azure_inrdt?
+sqodbc_uploadrdt <- function(dt, tb, db, id = NULL, id_unique = TRUE,
+                             rownames = FALSE, colnames = FALSE,
                              safer = TRUE, fast = TRUE, overwrite = TRUE, ...) {
 
   message("upload table: ", substitute(tb), " to ", substitute(db), " ...\n")
@@ -795,6 +797,14 @@ sqodbc_uploadrdt <- function(dt, tb, db, rownames = FALSE, colnames = FALSE,
     x <- sqlSave(channel = .sql, dat = dt, tablename = tb, rownames = rownames,
                  colnames = colnames, safer = safer, fast = fast, ...)
 
+    if ( !is.null(id) ) {
+
+      if ( ! all( id %in% colnames(dt) ) ) { stop(substitute(id),  " not in ", substitute(dt)) }
+
+      RODBC::sqlQuery(channel = .sql, query = 'create ' %+% ifelse(id_unique, 'unique ', ' ') %+%
+                   'index idx_' %+% tb %+% ' on ' %+% tb %+% '(' %+% paste0(id, collapse = ', ') %+% ');')
+    }
+
     odbcClose(.sql)
 
     if ( x != 1 ) {
@@ -812,6 +822,51 @@ sqodbc_uploadrdt <- function(dt, tb, db, rownames = FALSE, colnames = FALSE,
   message("upload table: ", substitute(tb), " to ", substitute(db), " ... done.\n")
 
   return(x)
+}
+
+#' sqodbc_removetb wrapper on sqlDrop
+sqodbc_removestb <- function(tb, db) {
+
+  message("remove table: ", substitute(tb), " on ", substitute(db), " ...\n")
+
+  .ptc <- proc.time()
+
+  if ( yg::sqodbc_existsqtb(tb, db) ) {
+
+    .sql <- sqodbc_createcnn(db)
+
+    x <- RODBC::sqlDrop(channel = .sql, sqtable = tb, error = FALSE)
+
+    odbcClose(.sql)
+
+  } else {
+
+    message("remove table: ", substitute(tb),  " not exists on ", substitute(db), " ...\n")
+
+    x <- NULL
+
+  }
+
+  # if ( ! (is.data.frame(x) || length(x) == 0 || x == "No Data") ) {
+  #
+  #   message("query returns none data and none success info?\n")
+  #
+  # }
+
+  if ( x == -1 ) {
+
+    message("query returns none data and none success info?\n")
+
+  }
+
+  .ptd <- proc.time() - .ptc
+
+  message("remove table: ", substitute(tb), " consumes ", .ptd[3], " seconds.\n")
+
+  message("remove table: ", substitute(tb), " on ", substitute(db), " ... done.\n")
+
+  return(x)
+
 }
 
 #' updatestb wrapper on sqlUpdate
