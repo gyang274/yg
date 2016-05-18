@@ -853,7 +853,7 @@ sqodbc_removestb <- function(tb, db) {
   #
   # }
 
-  if ( x == -1 ) {
+  if ( !is.null(x) && x == -1 ) {
 
     message("query returns none data and none success info?\n")
 
