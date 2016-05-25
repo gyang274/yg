@@ -64,14 +64,17 @@ create_disk_dbfile <- function(qy, db, fn, rfrh) {
 
 #' create_load_dbfile
 #' create and load dbfile into memory
-create_load_dbfile <- function(qy, db, fn, rfrh, colname, coltype) {
+create_load_dbfile <- function(qy, db, fn, rfrh, colname, coltype,
+                               sep = '\t', header = FALSE, skip = 0L,
+                               nrows = -1L, stringsAsFactors = FALSE) {
 
   create_disk_dbfile(qy, db, fn, rfrh)
 
   message("create_load_dbfile: load dbfile into memory ...\n")
 
-  xs <- fread(input = fn, sep = "\t", header = FALSE,
-              skip = 0L, nrows = -1L, stringsAsFactors = FALSE,
+  xs <- fread(input = fn, sep = sep, header = header,
+              skip = skip, nrows = nrows,
+              stringsAsFactors = stringsAsFactors,
               colClasses = coltype, col.names = colname)
 
   message("create_load_dbfile: load dbfile into memory ... done.\n")
@@ -98,9 +101,13 @@ create_load_dbfile_disk <- function(qy, db, fn, rfrh, qs, db_disk) {
 
 #' load_dbfile
 #' load dbfile into memory w. check on file.info intact
-load_dbfile <- function(fn, colname, coltype, waitime = 10, maxtime = 600) {
+load_dbfile <- function(fn, colname, coltype, waitime = 10, maxtime = 600,
+                        sep = '\t', header = FALSE, skip = 0L, nrows = -1L,
+                        stringsAsFactors = FALSE) {
 
   message("load_dbfile: load dbfile into memory ...\n")
+
+  stopifnot( file.exists(fn) )
 
   fs0 <- file.info(fn)
 
@@ -128,8 +135,9 @@ load_dbfile <- function(fn, colname, coltype, waitime = 10, maxtime = 600) {
 
     message("load_dbfile: file is ok for loading! ...\n")
 
-    xs <- fread(input = fn, sep = "\t", header = FALSE,
-                skip = 0L, nrows = -1L, stringsAsFactors = FALSE,
+    xs <- fread(input = fn, sep = sep, header = header,
+                skip = skip, nrows = nrows,
+                stringsAsFactors = stringsAsFactors,
                 colClasses = coltype, col.names = colname)
 
     message("load_dbfile: load dbfile into memory ... done.\n")

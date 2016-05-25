@@ -26,6 +26,25 @@ removeWS <- function(x) {
     gsub('\\s+', ' ', .)
 }
 
+#' CJ.dt
+#' CJ on data.table
+CJ.dt <- function(X, Y) {
+
+  stopifnot(is.data.table(X), is.data.table(Y))
+
+  k = NULL
+
+  X = X[, c(k = 1, .SD)]
+  setkey(X, k)
+
+  Y = Y[, c(k = 1, .SD)]
+  setkey(Y, NULL)
+
+  return( X[Y, allow.cartesian=TRUE][, k := NULL][] )
+
+}
+
+#' dtFillNA
 dtFillNA <- function(dt, fillNA = 0, fillNA_I = 0L, fillNA_C = "",
                      jcolidx = NULL, jcolnms = NULL) {
 
@@ -269,7 +288,8 @@ bcp_azure_query <- function(qy, db, fn) {
 
 #' bcp_azure_inrdt
 #' copy dt from r into db
-bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE) {
+bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
+                            id = NULL, id_unique = TRUE) {
 
   if ( is.null(qy_fmt) ) {
 
@@ -311,6 +331,16 @@ bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE) {
     " -d " %+% db[["dbn"]]
 
   executesc(sc)
+
+  if ( ! is.null(id) ) {
+
+    # gsub("[[:punct:]]", "", tb) remove "." and all other special characters in tb
+    qy_idx <-'create ' %+% ifelse(id_unique, 'unique ', ' ') %+%
+      'index idx_' %+% gsub("[[:punct:]]", "", tb) %+% ' on ' %+% tb %+% '(' %+% paste0(id, collapse = ', ') %+% ');'
+
+    sqodbc_executeqy(qy = qy_idx, db = db)
+
+  }
 
   if ( file.exists(fm_tmpt_file) ) { file.remove(fm_tmpt_file) }
 
@@ -802,7 +832,7 @@ sqodbc_uploadrdt <- function(dt, tb, db, id = NULL, id_unique = TRUE,
       if ( ! all( id %in% colnames(dt) ) ) { stop(substitute(id),  " not in ", substitute(dt)) }
 
       RODBC::sqlQuery(channel = .sql, query = 'create ' %+% ifelse(id_unique, 'unique ', ' ') %+%
-                   'index idx_' %+% tb %+% ' on ' %+% tb %+% '(' %+% paste0(id, collapse = ', ') %+% ');')
+                   'index idx_' %+% gsub("[[:punct:]]", "", tb) %+% ' on ' %+% tb %+% '(' %+% paste0(id, collapse = ', ') %+% ');')
     }
 
     odbcClose(.sql)
