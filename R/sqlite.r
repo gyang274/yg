@@ -9,16 +9,33 @@
 #------------------------------------------------------------------------------#
 #------------------------------------ init ------------------------------------#
 #------------------------------------------------------------------------------#
-# set x default to y when x is null or na
+#' `%|%`: set x default to y when x is null or na
 `%|%` <- function(x, y) { if ( is.null(x) || is.na(x) ) y else x }
 
-# concatenate strings
+#' `%+%`: concatenate strings
+#' @note `%+%` is also defined in ggplot2 and when loaded ggplot2 after yg
+#' using ggplot2::`%+%` in connecting string will cause R stop and crashes
+#' in such case it would be the best to use commented version as integrate
+#' `%+%` <- function(x, y) {
+#'
+#' if ( is.environment(x) && is.environment(y) ) {
+#'
+#'   return( ggplot2::`%+%`(x, y) )
+#'
+#' } else {
+#'
+#'   return( paste0(x, y) )
+#'
+#' }
+#' }
 `%+%` <- function(stringX, stringY) { return( paste0(stringX, stringY) ) }
 #------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------#
 #--------------------------------- data.table ---------------------------------#
 #------------------------------------------------------------------------------#
+#' removeWS
+#' replace whitespace "\t", "\n" and "\\s+" with single whitespace ' '.
 removeWS <- function(x) {
   x %>%
     gsub('\t'  , ' ', .) %>%
@@ -227,6 +244,9 @@ dtRfrhTb <- function(dt, tb, id, vd = NULL, nomatch = NULL, nofound = FALSE,
 #------------------------------------------------------------------------------#
 #----------------------- execute windows system command -----------------------#
 #------------------------------------------------------------------------------#
+#' executesc
+#' executesc wrapper on system() to execute system commands
+#' @note use shell() on calling and kicking off batch files
 executesc <- function(sc, ...) {
 
   message("execute system command: ", substitute(sc), " ...\n")
@@ -288,6 +308,7 @@ bcp_azure_query <- function(qy, db, fn) {
 
 #' bcp_azure_inrdt
 #' copy dt from r into db
+#' @param db: list of srv, usr, pwd, and dbn
 bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
                             id = NULL, id_unique = TRUE) {
 
@@ -486,7 +507,7 @@ sqlite_uploadrdt <- function(dt, tb, db, id = NULL, id_unique = TRUE,
   return(xs)
 }
 
-#' refreshtb mannual insert rows
+#' sqlite_refreshtb
 #' refreshtb will update value when primary key exist,
 #' and also insert new row when primary key not exist.
 sqlite_refreshtb <- function(dt, tb, id, db, dt_coltp = NULL, id_unique = TRUE,
@@ -573,6 +594,7 @@ sqlite_refreshtb <- function(dt, tb, id, db, dt_coltp = NULL, id_unique = TRUE,
 
 }
 
+#' sqlite_subsetidx
 #' fetch an subset of index table from sqlite db - inner join
 #' @param dt: a data.frame/data.table in R with column of key
 #' @param tb: a full reference table in sqlite with key value
@@ -899,7 +921,7 @@ sqodbc_removestb <- function(tb, db) {
 
 }
 
-#' updatestb wrapper on sqlUpdate
+#' sqodbc_updatestb wrapper on sqlUpdate
 #' sqlUpdate will update value when primary key exist,
 #' but no insert or append when primary key not exist.
 sqodbc_updatestb <- function(dt, tb, id, db, ...) {
@@ -932,6 +954,7 @@ sqodbc_updatestb <- function(dt, tb, id, db, ...) {
 
 }
 
+#' sqodbc_refreshtb
 #' refreshtb mannual insert rows
 #' refreshtb will update value when primary key exist,
 #' and also insert new row when primary key not exist.
@@ -990,6 +1013,7 @@ sqodbc_refreshtb <- function(dt, tb, id, db, batch_size = 1000) {
 
 }
 
+#' sqodbc_subsetidx
 #' fetch an subset of index table from sqodbc db - inner join
 #' @param dt: a data.frame/data.table in R with column of key
 #' @param tb: a full reference table in sqodbc with key value
