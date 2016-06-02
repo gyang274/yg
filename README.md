@@ -146,22 +146,30 @@ dtFillNA(dt = dHist, fillNA = 0)
 sqlite\_&lt;&gt; tools:
 -----------------------
 
-1.  sqlite\_&lt;&gt; tools realize all database managements on file based concept - one need only provide a <sqlite>.db file as db for input, instead of a connection to dbfile.
+-   sqlite\_&lt;&gt; tools realize all database managements on file based concept - one need only provide a <sqlite>.db file as db for input, instead of a connection to dbfile.
 
-2.  sqlite\_refreshtb and sqlite\_subsetidx worth a separate mention:
+-   sqlite\_refreshtb and sqlite\_subsetidx worth a separate mention:
 
--   sqlite\_refreshtb: refreshtb will update value when primary key exist, and also insert new row when primary key not exist.
+    -   sqlite\_refreshtb: refreshtb will update value when primary key exist, and also insert new row when primary key not exist.
 
--   sqlite\_subsetidx: given a r data.table (dt) with id column, fetch from sqlite database (db) table (tb) based on id for all rows - works efficient when dt and tb both have millions or hundreds of millions of rows.
+    -   sqlite\_subsetidx: given a r data.table (dt) with id column, fetch from sqlite database (db) table (tb) based on id for all rows - works efficient when dt and tb both have millions or hundreds of millions of rows.
 
 sqodbc\_&lt;&gt; tools:
 -----------------------
 
-1.  sqodbc\_&lt;&gt; tools realize all database managements on file based concept - one need only provide a <sqodbc>.db list as db for input, instead of a connection to RODBC server. A <sqodbc>.db list should contains all information for establishing a connection, e.g., it should be a list of \[dsn\] srv usr pwd and dbn - \[dsn\] was used in earlier version, but removed so using srv, usr, pwd and dbn. In this way, it is self-contained in R, no need to specify dsn in system settings.
+-   sqodbc\_&lt;&gt; tools realize all database managements on file based concept - one need only provide a <sqodbc>.db list as db for input, instead of a connection to RODBC server. A <sqodbc>.db list should contains all information for establishing a connection, e.g., it should be a list of \[dsn\] (database server name - as in windows odbc data source administrator), srv (sql server address/ip), usr (username) pwd (password) and dbn (database name, e.g., master) - \[dsn\] was used in earlier version, but removed so using srv, usr, pwd and dbn. In this way, it is self-contained in R, no need to specify dsn in system settings.
 
-*TODO*: should sqodbc\_createcnn() being added a capabilty to establish connection using windows authentication, rather than using <sqodbc>.db list only for security purpose?
+    *TODO*: should sqodbc\_createcnn() being added a capabilty to establish connection using windows authentication, rather than using <sqodbc>.db list only for security purpose?
 
-1.  sqodbc\_refreshtb and sqodbc\_subsetidx are corresponding implementation of sqlite\_refreshtb and sqlite\_subsetidx.
+-   sqodbc\_refreshtb and sqodbc\_subsetidx are corresponding implementation of sqlite\_refreshtb and sqlite\_subsetidx.
 
 bcp tools - often faster than sqodbc\_&lt;&gt; equivalents:
 -----------------------------------------------------------
+
+-   bcp\_azure\_table: wrapper around bcp out - download sql table into local file. An input db should be a list of srv usr pwd and dbn.
+
+-   bcp\_azure\_query: wrapper around bcp queryout - download query result into local file.
+
+-   bcp\_azure\_inrdt: wrapper around bcp in - upload r data.table or data.frame into sql server. R data.table and data.frame should not have columns of lists. Function can auto detect R data type, integer, numeric and character and specify corresponding format when uploading.
+
+    *TODO*: should add logical in auto data type determination: det\_col\_type.
