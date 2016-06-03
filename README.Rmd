@@ -20,7 +20,7 @@ yg implements a set of database management tools for communicating with SQLite o
 
 ## data.table tools:
 
-1. CJ.dt: extends data.table::CJ to data.table. CJ.dt(X, Y) requires both X and Y be data.table and generate a fully combine of each row of X w.r.t each row of Y.
++ CJ.dt: extends data.table::CJ to data.table. CJ.dt(X, Y) requires both X and Y be data.table and generate a fully combine of each row of X w.r.t each row of Y.
 
 ```{r}
 library(yg)
@@ -31,7 +31,7 @@ Y <- data.table(c = c(5.8,13.21,34.55), d = c("a","B","C"))
 Z <- CJ.dt(X, Y)
 ```
 
-2. dtFillNA: data.table fill NA in situ, allows fill different values for numeric NA, integer NA and character NA.
++ dtFillNA: data.table fill NA in situ, allows fill different values for numeric NA, integer NA and character NA.
 
 ```{r}
 X <- data.table(a = c(TRUE, FALSE, FALSE), b = c(1L,NA_integer_,3L))
@@ -42,7 +42,7 @@ Z <- CJ.dt(X, Y)
 dtFillNA(dt = Z, fillNA = 34.54, fillNA_I = 4L, fillNA_C = "b")
 ```
 
-3. dtRfrhTb: update primary data.table (dt) with a reference data.table (tb) based on matching id value on id columns, and update primary data.table vd value on vd columns using refernce data.table vd valude on vd columns. Also, one can specify when id in dt not find a match in tb, should the vd keep intact or use some pre-defined value. Similary, one can specify when id not in dt but find in tb, should it be added into dt or not. Both id and vd can be multiple columns. Value update operations are in situ in default for space and efficiency, e.g., the dt input is being changed in place without copying. This feature can be turned off by in_situ = FALSE. Insertion operations when nofound = TRUE are not in situ, so one still need to assign the result back - would prefer also in situ?
++ dtRfrhTb: update primary data.table (dt) with a reference data.table (tb) based on matching id value on id columns, and update primary data.table vd value on vd columns using refernce data.table vd valude on vd columns. Also, one can specify when id in dt not find a match in tb, should the vd keep intact or use some pre-defined value. Similary, one can specify when id not in dt but find in tb, should it be added into dt or not. Both id and vd can be multiple columns. Value update operations are in situ in default for space and efficiency, e.g., the dt input is being changed in place without copying. This feature can be turned off by in_situ = FALSE. Insertion operations when nofound = TRUE are not in situ, so one still need to assign the result back - would prefer also in situ?
 
 This function is inspired by a task on updating sale and inventory. The primary data.table (dt) keeps historical sale and inventory up to yesterday, and the reference data.table (tb) contains today's sale and inventory. Every day, matched id should get updated sale and inventory vd from tb. When id in dt does not find a match in tb, sale should be set to 0 with nomatch = 0, and inventory should keep intact. When id not in dt is shown in tb, new products added in catalogue, and new id should be inserted into primary dt with nofound = TRUE.
 
