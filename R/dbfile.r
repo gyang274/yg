@@ -275,6 +275,20 @@ remove_dbfile <- function(dbfile) {
 
     xs <- file.remove( dbfile )
 
+    # i noticed that in some practical cases in windows file just cannot be deleted
+    # because weired permission denied issue check file mode 444 instead of 666 777
+    # don't know why no one specify any mode so implement this fallback system call
+
+    if ( !xs ) {
+
+      message("remove_dbfile: fallback system force delete.\n")
+
+      xs_sc <- yg::executesc(sc = "rm -f --no-preserve-root " %+% getwd() %+% "/" %+% dbfile)
+
+      xs <- (xs_sc == 0)
+
+    }
+
   } else {
 
     message("remove_dbfile: ", dbfile, " nonexistence?\n")
