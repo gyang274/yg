@@ -18,23 +18,23 @@ create_disk_dbfile <- function(qy, db, fn, rfrh) {
 
     if ( ! file.exists(fn) ) {
 
-      message("create_load_dbfile: init dbfile into disk ...\n")
+      message("create_disk_dbfile: init dbfile into disk ...\n")
 
       yg::bcp_azure_query(qy = qy, db = db, fn = fn)
 
-      message("create_load_dbfile: init dbfile into disk ... done.\n")
+      message("create_disk_dbfile: init dbfile into disk ... done.\n")
 
     } else {
 
-      message("create_load_dbfile: init dbfile into disk ...\n")
+      message("create_disk_dbfile: init dbfile into disk ...\n")
 
-      message("create_load_dbfile: write into db_tmpt_file as dbfile exist ...\n")
+      message("create_disk_dbfile: write into db_tmpt_file as dbfile exist ...\n")
 
       db_tmpt_file <- getwd() %+% gsub("\\\\", "/", tempfile(pattern = "db", tmpdir = "", fileext = ""))
 
       yg::bcp_azure_query(qy = qy, db = db, fn = db_tmpt_file)
 
-      message("create_load_dbfile: copy db_tmpt_file into dbfile ...\n")
+      message("create_disk_dbfile: copy db_tmpt_file into dbfile ...\n")
 
       ss0 <- remove_dbfile(fn)
 
@@ -42,11 +42,11 @@ create_disk_dbfile <- function(qy, db, fn, rfrh) {
 
       if ( ss0 && ss1 ) {
 
-        message("create_load_dbfile: init dbfile into disk ... done.\n")
+        message("create_disk_dbfile: init dbfile into disk ... done.\n")
 
       } else {
 
-        message("create_load_dbfile: init dbfile into disk ... fail.\n")
+        message("create_disk_dbfile: init dbfile into disk ... fail.\n")
 
       }
 
@@ -54,7 +54,7 @@ create_disk_dbfile <- function(qy, db, fn, rfrh) {
 
   } else {
 
-    message("create_load_dbfile: init dbfile skipped as file exists and no refresh required ... done.\n")
+    message("create_disk_dbfile: init dbfile skipped as file exists and no refresh required ... done.\n")
 
   }
 
@@ -72,10 +72,22 @@ create_load_dbfile <- function(qy, db, fn, rfrh, colname, coltype,
 
   message("create_load_dbfile: load dbfile into memory ...\n")
 
-  xs <- fread(input = fn, sep = sep, header = header,
-              skip = skip, nrows = nrows,
-              stringsAsFactors = stringsAsFactors,
-              colClasses = coltype, col.names = colname)
+  # fread would report error when file empty
+  if ( file.size(fn) == 0 ) {
+
+    # warning?
+    message("create_load_dbfile: dbfile is size 0 - return an empty data.table w.r.t colname and coltype ...\n")
+
+    eval(parse(text = 'xs <- data.table(' %+% paste(paste0(colname, ' = ', coltype, '(0L)'), collapse = ', ') %+% ')'))
+
+  } else {
+
+    xs <- fread(input = fn, sep = sep, header = header,
+                skip = skip, nrows = nrows,
+                stringsAsFactors = stringsAsFactors,
+                colClasses = coltype, col.names = colname)
+
+  }
 
   message("create_load_dbfile: load dbfile into memory ... done.\n")
 
