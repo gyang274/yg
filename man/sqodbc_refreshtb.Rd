@@ -7,7 +7,7 @@ refreshtb mannual insert rows
 refreshtb will update value when primary key exist,
 and also insert new row when primary key not exist.}
 \usage{
-sqodbc_refreshtb(dt, tb, id, db, batch_size = 1000)
+sqodbc_refreshtb(dt, tb, id, db, batch_size = 10000)
 }
 \description{
 sqodbc_refreshtb

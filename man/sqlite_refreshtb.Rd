@@ -7,7 +7,7 @@ refreshtb will update value when primary key exist,
 and also insert new row when primary key not exist.}
 \usage{
 sqlite_refreshtb(dt, tb, id, db, dt_coltp = NULL, id_unique = TRUE,
-  batch_size = 1000)
+  batch_size = 10000)
 }
 \description{
 sqlite_refreshtb

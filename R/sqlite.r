@@ -511,7 +511,7 @@ sqlite_uploadrdt <- function(dt, tb, db, id = NULL, id_unique = TRUE,
 #' refreshtb will update value when primary key exist,
 #' and also insert new row when primary key not exist.
 sqlite_refreshtb <- function(dt, tb, id, db, dt_coltp = NULL, id_unique = TRUE,
-                             batch_size = 1000) {
+                             batch_size = 10000) {
 
   message("refresh table: ", substitute(tb), " in ", substitute(db), " ...\n")
 
@@ -600,7 +600,7 @@ sqlite_refreshtb <- function(dt, tb, id, db, dt_coltp = NULL, id_unique = TRUE,
 #' @param tb: a full reference table in sqlite with key value
 #' @return a data.table with value append to the R data.table
 #' id is limit to single index - add capability to id multiple index
-sqlite_subsetidx <- function(dt, tb, db, id, batch_size = 100000,
+sqlite_subsetidx <- function(dt, tb, db, id, batch_size = 10000,
                              all.dt = FALSE, all.tb = FALSE) {
 
   message("subset index from table: ", substitute(tb), " in ", substitute(db), " ...\n")
@@ -643,7 +643,8 @@ sqlite_subsetidx <- function(dt, tb, db, id, batch_size = 100000,
     # .xx <- dt_idx[(.ik + 1):min(.ik + batch_size, .nn), ] %>% unlist(use.names = FALSE)
     .xx <- dt_idx[(.ik + 1):min(.ik + batch_size, .nn)]
 
-    .qy <- 'select * from ' %+% tb %+% ' where ' %+% id %+% ' in ("' %+% paste0(.xx, collapse = '", "') %+% '")'
+    # double to escape ' when query against sqlite sql
+    .qy <- 'select * from ' %+% tb %+% ' where ' %+% id %+% ' in ("' %+% paste0(gsub("'", "''", .xx), collapse = '", "') %+% '")'
 
     dt_rtn_chunk <- RSQLite::dbGetQuery(conn = .sqlite_db, statement = .qy)
 
@@ -676,7 +677,8 @@ sqlite_selectidx <- function(tb, db, id, id_value) {
 
   .sqlite_db <- dbConnect(dbDriver("SQLite"), db)
 
-  xs <- dbGetQuery(.sqlite_db, "select * from " %+% tb %+% " where " %+% paste(id, "'" %+% id_value %+% "'", sep = " = ", collapse = " and ") %+% ";") %>%
+  # double to escape ' when query against sqlite sql
+  xs <- dbGetQuery(.sqlite_db, "select * from " %+% tb %+% " where " %+% paste(id, "'" %+% gsub("'", "''", id_value) %+% "'", sep = " = ", collapse = " and ") %+% ";") %>%
     `class<-`(c("data.table", "data.frame"))
 
   dbDisconnect(.sqlite_db)
@@ -958,7 +960,7 @@ sqodbc_updatestb <- function(dt, tb, id, db, ...) {
 #' refreshtb mannual insert rows
 #' refreshtb will update value when primary key exist,
 #' and also insert new row when primary key not exist.
-sqodbc_refreshtb <- function(dt, tb, id, db, batch_size = 1000) {
+sqodbc_refreshtb <- function(dt, tb, id, db, batch_size = 10000) {
 
   message("refresh table: ", substitute(tb), " in ", substitute(db), " ...\n")
 
@@ -1021,7 +1023,7 @@ sqodbc_refreshtb <- function(dt, tb, id, db, batch_size = 1000) {
 #' id limit to single index: add capability to id multi index
 #' sqodbc_subsetidx is a simplier verison of sqlite_subsetidx
 #' without checking on type of each column when define dt_rtn
-sqodbc_subsetidx <- function(dt, tb, db, id, batch_size = 100000,
+sqodbc_subsetidx <- function(dt, tb, db, id, batch_size = 10000,
                              all.dt = FALSE, all.tb = FALSE) {
 
   # TODO: add batch_size to improve efficiency when subset a large set of id
@@ -1052,7 +1054,8 @@ sqodbc_subsetidx <- function(dt, tb, db, id, batch_size = 100000,
     # .xx <- dt_idx[(.ik + 1):min(.ik + batch_size, .nn), ] %>% unlist(use.names = FALSE)
     .xx <- dt_idx[(.ik + 1):min(.ik + batch_size, .nn)]
 
-    .qy <- "select * from " %+% tb %+% " where " %+% id %+% " in ('" %+% paste0(.xx, collapse = "', '") %+% "')"
+    # double to escape ' when query against azure sql
+    .qy <- "select * from " %+% tb %+% " where " %+% id %+% " in ('" %+% paste0(gsub("'", "''", .xx), collapse = "', '") %+% "')"
 
     .vv <- RODBC::sqlQuery(channel = .sql, query = .qy)
 
@@ -1087,7 +1090,8 @@ sqodbc_selectidx <- function(tb, db, id, id_value) {
 
   .sql <- sqodbc_createcnn(db)
 
-  x <- RODBC::sqlQuery(channel = .sql, query = "select * from " %+% tb %+% " where " %+% paste(id, "'" %+% id_value %+% "'", sep = " = ", collapse = " and ") %+% ";") %>%
+  # double to escape ' when query against azure sql
+  x <- RODBC::sqlQuery(channel = .sql, query = "select * from " %+% tb %+% " where " %+% paste(id, "'" %+% gsub("'", "''", id_value) %+% "'", sep = " = ", collapse = " and ") %+% ";") %>%
     `class<-`(c("data.table", "data.frame"))
 
   odbcClose(.sql)

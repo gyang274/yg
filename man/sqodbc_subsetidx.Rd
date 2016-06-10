@@ -5,7 +5,7 @@
 \title{sqodbc_subsetidx
 fetch an subset of index table from sqodbc db - inner join}
 \usage{
-sqodbc_subsetidx(dt, tb, db, id, batch_size = 1e+05, all.dt = FALSE,
+sqodbc_subsetidx(dt, tb, db, id, batch_size = 10000, all.dt = FALSE,
   all.tb = FALSE)
 }
 \arguments{

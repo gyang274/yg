@@ -154,12 +154,16 @@ sqlite\_&lt;&gt; tools:
 
     -   sqlite\_subsetidx: given a r data.table (dt) with id column, fetch from sqlite database (db) table (tb) based on id for all rows - works efficient when dt and tb both have millions or hundreds of millions of rows.
 
+    *TODO*: fix: sqodbc\_subsetidx() can not handle when both ' and " in dt-id, in fact it cannot handle ' in dt-id.
+
 sqodbc\_&lt;&gt; tools:
 -----------------------
 
 -   sqodbc\_&lt;&gt; tools realize all database managements on file based concept - one need only provide a <sqodbc>.db list as db for input, instead of a connection to RODBC server. A <sqodbc>.db list should contains all information for establishing a connection, e.g., it should be a list of \[dsn\] (database server name - as in windows odbc data source administrator), srv (sql server address/ip), usr (username) pwd (password) and dbn (database name, e.g., master) - \[dsn\] was used in earlier version, but removed so using srv, usr, pwd and dbn. In this way, it is self-contained in R, no need to specify dsn in system settings.
 
     *TODO*: should sqodbc\_createcnn() being added a capabilty to establish connection using windows authentication, rather than using <sqodbc>.db list only for security purpose?
+
+    *TODO*: fix: sqodbc\_subsetidx() can not handle when both ' and " in dt-id, in fact it cannot handle ' in dt-id.
 
 -   sqodbc\_refreshtb and sqodbc\_subsetidx are corresponding implementation of sqlite\_refreshtb and sqlite\_subsetidx.
 

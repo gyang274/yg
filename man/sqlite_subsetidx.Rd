@@ -5,7 +5,7 @@
 \title{sqlite_subsetidx
 fetch an subset of index table from sqlite db - inner join}
 \usage{
-sqlite_subsetidx(dt, tb, db, id, batch_size = 1e+05, all.dt = FALSE,
+sqlite_subsetidx(dt, tb, db, id, batch_size = 10000, all.dt = FALSE,
   all.tb = FALSE)
 }
 \arguments{
