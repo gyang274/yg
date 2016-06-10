@@ -119,5 +119,3 @@ dtFillNA(dt = dHist, fillNA = 0)
 + bcp\_azure\_inrdt: wrapper around bcp in - upload r data.table or data.frame into sql server. R data.table and data.frame should not have columns of lists. Function can auto detect R data type, integer, numeric and character and specify corresponding format when uploading.
 
     _TODO_: should add logical in auto data type determination: det_col_type.
-    
-    
