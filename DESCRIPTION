@@ -12,6 +12,6 @@ Depends:
     magrittr,
     RSQLite,
     RODBC
-URL: http://github.com/gyang274/yg
-BugReports: http://github.com/gyang274/yg/issues
+URL: https://github.com/gyang274/yg
+BugReports: https://github.com/gyang274/yg/issues
 RoxygenNote: 5.0.1

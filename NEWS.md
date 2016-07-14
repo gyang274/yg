@@ -1,0 +1,10 @@
+<!-- README.md is generated from README.Rmd. -->
+yg
+==
+
+Development Log
+---------------
+
+### 2016.07.14
+
+-   Add `[]` around `db[["dbn"]]` in `qy_fmt` in `sqlite.r::bcp_azure_inrdt()`, in case `db[["dbn"]]` is a none-standard database name, e.g., my-database with "-". The `tb` name should be also added `[]` when it is a none-standard name, rely on user, e.g., when the `tb` name is `dbo.a-tbl` then must specify as `[dbo].[a-tbl]` - TODO: split by `.` and add `[]` on each piece and combine.

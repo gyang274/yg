@@ -323,8 +323,8 @@ bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
 
   if ( overwrite ) {
 
-    qy_fmt <- "if object_id('" %+% db[["dbn"]] %+% "." %+% tb %+%"', 'u') is not null " %+%
-      "drop table " %+% db[["dbn"]] %+% "." %+% tb %+% ";\n" %+%
+    qy_fmt <- "if object_id('[" %+% db[["dbn"]] %+% "]." %+% tb %+%"', 'u') is not null " %+%
+      "drop table [" %+% db[["dbn"]] %+% "]." %+% tb %+% ";\n" %+%
       qy_fmt %>% removeWS
 
   }
