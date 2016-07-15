@@ -339,7 +339,7 @@ bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
     " -P " %+% db[["pwd"]] %+%
     " -d " %+% db[["dbn"]]
 
-  executesc(fm)
+  xs_fm <- executesc(fm)
 
   sc_tmpt_file <- getwd() %+% gsub("\\\\", "/", tempfile(pattern = "sc", tmpdir = "", fileext = ".txt"))
 
@@ -351,7 +351,7 @@ bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
     " -P " %+% db[["pwd"]] %+%
     " -d " %+% db[["dbn"]]
 
-  executesc(sc)
+  xs_sc <- executesc(sc)
 
   if ( ! is.null(id) ) {
 
@@ -367,7 +367,7 @@ bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
 
   if ( file.exists(sc_tmpt_file) ) { file.remove(sc_tmpt_file) }
 
-  return(NULL)
+  return(xs_sc)
 }
 
 det_col_type <- function(x) {
