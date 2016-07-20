@@ -281,12 +281,27 @@ executesc <- function(sc, ...) {
 #' @param db: list of srv, usr, pwd, and dbn
 bcp_azure_table <- function(tb, db, fn) {
 
-  sc <- "bcp " %+% tb %+% " out " %+% fn %+%
-    " -S " %+% db[["srv"]] %+%
-    " -U " %+% db[["usr"]] %+%
-    " -P " %+% db[["pwd"]] %+%
-    " -d " %+% db[["dbn"]] %+%
-    " -c -r \r\n"
+  winAuth <- db[["winAuth"]] %|% FALSE
+
+  if ( winAuth ) {
+
+    message("bcp_azure_table: connect sql server with windows authentication.\n")
+
+    sc <- "bcp " %+% tb %+% " out " %+% fn %+%
+      " -S " %+% db[["srv"]] %+%
+      " -d " %+% db[["dbn"]] %+%
+      " -T -c -r \r\n"
+
+  } else {
+
+    sc <- "bcp " %+% tb %+% " out " %+% fn %+%
+      " -S " %+% db[["srv"]] %+%
+      " -U " %+% db[["usr"]] %+%
+      " -P " %+% db[["pwd"]] %+%
+      " -d " %+% db[["dbn"]] %+%
+      " -c -r \r\n"
+
+  }
 
   executesc(sc)
 }
@@ -296,12 +311,27 @@ bcp_azure_table <- function(tb, db, fn) {
 #' @param db: list of srv, usr, pwd, and dbn
 bcp_azure_query <- function(qy, db, fn) {
 
-  sc <- "bcp \"" %+% qy %+% "\" queryout " %+% fn %+%
-    " -S " %+% db[["srv"]] %+%
-    " -U " %+% db[["usr"]] %+%
-    " -P " %+% db[["pwd"]] %+%
-    " -d " %+% db[["dbn"]] %+%
-    " -c -r \r\n"
+  winAuth <- db[["winAuth"]] %|% FALSE
+
+  if ( winAuth ) {
+
+    message("bcp_azure_query: connect sql server with windows authentication.\n")
+
+    sc <- "bcp \"" %+% qy %+% "\" queryout " %+% fn %+%
+      " -S " %+% db[["srv"]] %+%
+      " -d " %+% db[["dbn"]] %+%
+      " -T -c -r \r\n"
+
+  } else {
+
+    sc <- "bcp \"" %+% qy %+% "\" queryout " %+% fn %+%
+      " -S " %+% db[["srv"]] %+%
+      " -U " %+% db[["usr"]] %+%
+      " -P " %+% db[["pwd"]] %+%
+      " -d " %+% db[["dbn"]] %+%
+      " -c -r \r\n"
+
+  }
 
   executesc(sc)
 }
@@ -311,6 +341,8 @@ bcp_azure_query <- function(qy, db, fn) {
 #' @param db: list of srv, usr, pwd, and dbn
 bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
                             id = NULL, id_unique = TRUE) {
+
+  winAuth <- db[["winAuth"]] %|% FALSE
 
   if ( is.null(qy_fmt) ) {
 
@@ -323,8 +355,8 @@ bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
 
   if ( overwrite ) {
 
-    qy_fmt <- "if object_id('[" %+% db[["dbn"]] %+% "]." %+% tb %+%"', 'u') is not null " %+%
-      "drop table [" %+% db[["dbn"]] %+% "]." %+% tb %+% ";\n" %+%
+    qy_fmt <- "if object_id('" %+% db[["dbn"]] %+% "." %+% tb %+%"', 'u') is not null " %+%
+      "drop table " %+% db[["dbn"]] %+% "." %+% tb %+% ";\n" %+%
       qy_fmt %>% removeWS
 
   }
@@ -333,11 +365,22 @@ bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
 
   fm_tmpt_file <- getwd() %+% gsub("\\\\", "/", tempfile(pattern = "fm", tmpdir = "", fileext = ".xml"))
 
-  fm <- "bcp " %+% tb %+% " format nul -c -x -f " %+% fm_tmpt_file %+%
-    " -S " %+% db[["srv"]] %+%
-    " -U " %+% db[["usr"]] %+%
-    " -P " %+% db[["pwd"]] %+%
-    " -d " %+% db[["dbn"]]
+  if ( winAuth ) {
+
+    fm <- "bcp " %+% tb %+% " format nul -c -x -f " %+% fm_tmpt_file %+%
+      " -S " %+% db[["srv"]] %+%
+      " -d " %+% db[["dbn"]] %+%
+      " -T "
+
+  } else {
+
+    fm <- "bcp " %+% tb %+% " format nul -c -x -f " %+% fm_tmpt_file %+%
+      " -S " %+% db[["srv"]] %+%
+      " -U " %+% db[["usr"]] %+%
+      " -P " %+% db[["pwd"]] %+%
+      " -d " %+% db[["dbn"]]
+
+  }
 
   xs_fm <- executesc(fm)
 
@@ -345,11 +388,22 @@ bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
 
   write.table(dt, file = sc_tmpt_file, col.names = FALSE, row.names = FALSE, quote = FALSE, na = "", sep = "\t")
 
-  sc <- "bcp " %+% tb %+% " in " %+% sc_tmpt_file %+% " -f " %+% fm_tmpt_file %+%
-    " -S " %+% db[["srv"]] %+%
-    " -U " %+% db[["usr"]] %+%
-    " -P " %+% db[["pwd"]] %+%
-    " -d " %+% db[["dbn"]]
+  if ( winAuth ) {
+
+    sc <- "bcp " %+% tb %+% " in " %+% sc_tmpt_file %+% " -f " %+% fm_tmpt_file %+%
+      " -S " %+% db[["srv"]] %+%
+      " -d " %+% db[["dbn"]] %+%
+      " -T "
+
+  } else {
+
+    sc <- "bcp " %+% tb %+% " in " %+% sc_tmpt_file %+% " -f " %+% fm_tmpt_file %+%
+      " -S " %+% db[["srv"]] %+%
+      " -U " %+% db[["usr"]] %+%
+      " -P " %+% db[["pwd"]] %+%
+      " -d " %+% db[["dbn"]]
+
+  }
 
   xs_sc <- executesc(sc)
 
@@ -696,16 +750,38 @@ sqlite_selectidx <- function(tb, db, id, id_value) {
 sqodbc_createcnn <- function(db) {
 
   # require windows dsn configuration #
-  # RODBC::odbcConnect(dsn = db[["dsn"]],
-  #                    uid = db[["usr"]],
-  #                    pwd = db[["pwd"]])
+  # RODBC::odbcConnect(
+  #   dsn = db[["dsn"]],
+  #   uid = db[["usr"]],
+  #   pwd = db[["pwd"]]
+  # )
 
-  RODBC::odbcDriverConnect(connection =
-                             "driver=ODBC Driver 11 for SQL Server;" %+%
-                             "server="   %+% db[["srv"]] %+% ";" %+%
-                             "uid="      %+% db[["usr"]] %+% ";" %+%
-                             "pwd="      %+% db[["pwd"]] %+% ";" %+%
-                             "database=" %+% db[["dbn"]])
+  winAuth <- db[["winAuth"]] %|% FALSE
+
+  if ( winAuth ) {
+
+    xc <- RODBC::odbcDriverConnect(
+      connection =
+        "driver=ODBC Driver 11 for SQL Server;" %+%
+        "server="   %+% db[["srv"]] %+% ";" %+%
+        "database=" %+% db[["dbn"]] %+% ";" %+%
+        "trusted_connection=true"
+    )
+
+  } else {
+
+    xc <- RODBC::odbcDriverConnect(
+      connection =
+        "driver=ODBC Driver 11 for SQL Server;" %+%
+        "server="   %+% db[["srv"]] %+% ";" %+%
+        "uid="      %+% db[["usr"]] %+% ";" %+%
+        "pwd="      %+% db[["pwd"]] %+% ";" %+%
+        "database=" %+% db[["dbn"]]
+    )
+
+  }
+
+  return( xc )
 
 }
 
