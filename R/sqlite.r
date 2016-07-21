@@ -765,7 +765,7 @@ sqodbc_createcnn <- function(db) {
         "driver=ODBC Driver 11 for SQL Server;" %+%
         "server="   %+% db[["srv"]] %+% ";" %+%
         "database=" %+% db[["dbn"]] %+% ";" %+%
-        "trusted_connection=true"
+        "trusted_connection=yes"
     )
 
   } else {
