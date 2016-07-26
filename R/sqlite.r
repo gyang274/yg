@@ -346,7 +346,7 @@ bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
 
   if ( is.null(qy_fmt) ) {
 
-    qy_fmt <- "create table " %+% tb %+%
+    qy_fmt <- "create table [" %+% db[["dbn"]] %+% "]." %+% tb %+%
       " (" %+%
       paste(paste(colnames(dt), det_col_type(dt), "NULL"), collapse = ", ") %+%
       ");" %>% removeWS
@@ -355,8 +355,8 @@ bcp_azure_inrdt <- function(dt, tb, db, qy_fmt = NULL, overwrite = TRUE,
 
   if ( overwrite ) {
 
-    qy_fmt <- "if object_id('" %+% db[["dbn"]] %+% "." %+% tb %+%"', 'u') is not null " %+%
-      "drop table " %+% db[["dbn"]] %+% "." %+% tb %+% ";\n" %+%
+    qy_fmt <- "if object_id('[" %+% db[["dbn"]] %+% "]." %+% tb %+%"', 'u') is not null " %+%
+      "drop table [" %+% db[["dbn"]] %+% "]." %+% tb %+% ";\n" %+%
       qy_fmt %>% removeWS
 
   }
