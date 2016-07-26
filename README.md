@@ -127,7 +127,10 @@ set.seed(285714L)
 # refresh master tbl: use fcc and sku together as id when id nomatch set vd to 0 
 # as no sale, and when id nofound in dt (dHist) will be added as new sku in fcc.
 
-(dHist <- dtRfrhTb(dt = dHist, tb = dSale, id = c("fcc", "sku"), vd = "spt", nomatch = 0L, nofound = TRUE, in_situ = TRUE))
+(dHist <- dtRfrhTb(
+  dt = dHist, tb = dSale, id = c("fcc", "sku"), vd = "spt", 
+  nomatch = 0L, nofound = TRUE, in_situ = TRUE
+))
 #> dtRfrhTb: insert id in tb not in dt into dt.
 #>    fcc sku bgn end spt
 #> 1:  NJ  A1  26   8   1
@@ -139,7 +142,10 @@ set.seed(285714L)
 #> 7:  TX  A4  32  10   4
 #> 8:  NJ  A4  NA  NA   2
 
-(dHist <- dtRfrhTb(dt = dHist, tb = dInvt, id = c("fcc", "sku"), vd = c("bgn", "end"), nomatch = NULL, nofound = TRUE, in_situ = TRUE))
+(dHist <- dtRfrhTb(
+  dt = dHist, tb = dInvt, id = c("fcc", "sku"), vd = c("bgn", "end"),
+  nomatch = NULL, nofound = TRUE, in_situ = TRUE
+))
 #> dtRfrhTb: insert id in tb not in dt into dt.
 #>    fcc sku bgn end spt
 #> 1:  NJ  A1   6   7   1
@@ -189,7 +195,7 @@ sqodbc_dblist <-function() {
 
   list(
     
-    # dsn = 'databaseNameWindowsODBCDSA',
+    # dsn = 'databaseSeverNameInWinODBC',
 
     srv = 'one-sql.database.windows.net',
 
@@ -207,24 +213,28 @@ sqodbc_dblist_with_winAuth <-function() {
 
   list(
 
-    # dsn = 'databaseNameWindowsODBCDSA',
+    # dsn = 'databaseSeverNameInWinODBC',
     
     srv = 'one-sql.database.windows.net',
 
     dbn = 'database-in-sql-server',
     
-    winAuth = FALSE
+    winAuth = TRUE
 
   )
 
 }
 
 
-# list all table in database in sql-server
+# list all tables in database in sql-server
+sqodbc_executeqy(
+  qy = "select * from INFORMATION_SCHEMA.TABLES", db = sqodbc_dblist
+)
 
-sqodbc_executeqy(qy = "select * from INFORMATION_SCHEMA.TABLES", db = sqodbc_dblist)
-
-sqodbc_executeqy(qy = "select * from INFORMATION_SCHEMA.TABLES", db = sqodbc_dblist_with_winAuth)
+# use windows authentication for connection
+sqodbc_executeqy(
+  qy = "select * from INFORMATION_SCHEMA.TABLES", db = sqodbc_dblist_with_winAuth
+)
 ```
 
 -   `sqodbc_refreshtb` and `sqodbc_subsetidx` are corresponding implementation of `sqlite_refreshtb` and `sqlite_subsetidx`.
