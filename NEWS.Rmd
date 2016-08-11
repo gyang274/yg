@@ -18,6 +18,10 @@ knitr::opts_chunk$set(
 
 ## Development Log
 
+### 2016.08.05
+
++ Fix a bug in `sqlite_uploadrdt()` when `id=<"id">, overwite = FALSE, append = TRUE`, if an index is already exist in table from a previous upload would cause `error index idx_<tb> already exists` - use `reindex` to re-create this index.
+
 ### 2016.07.22
 
 + Add `winAuth` on `bcp_azure_table`, `bcp_azure_query`, `bcp_azure_inrdt`and `sqodbc_createcnn` for connecting to SQL server using windows authentication. To use windows authentication, user must specify database list `db` with an compenent of `winAuth = TRUE`, e.g., `db[["winAuth"]] = TRUE`. The windows authentication when specified will override username and password when establish connections.

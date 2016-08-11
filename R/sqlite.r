@@ -475,7 +475,7 @@ sqlite_executeqy <- function(qy, db, ...) {
 
   xs <- dbGetQuery(.sqlite_db, qy, ...)
 
-  dbDisconnect(.sqlite_db)
+  on.exit(dbDisconnect(.sqlite_db))
 
   return(xs)
 }
@@ -487,7 +487,7 @@ sqlite_existsqtb <- function(tb, db) {
 
   xs <- dbExistsTable(.sqlite_db, tb)
 
-  dbDisconnect(.sqlite_db)
+  on.exit(dbDisconnect(.sqlite_db))
 
   return(xs)
 }
@@ -504,7 +504,7 @@ sqlite_fetchsqtb <- function(tb, db, ...) {
   dt <- dbReadTable(.sqlite_db, tb, ...) %>%
     `class<-`(c("data.table", "data.frame"))
 
-  dbDisconnect(.sqlite_db)
+  on.exit(dbDisconnect(.sqlite_db))
 
   .ptd <- proc.time() - .ptc
 
@@ -522,7 +522,7 @@ sqlite_removestb <- function(tb, db) {
 
   xs <- dbRemoveTable(.sqlite_db, tb)
 
-  dbDisconnect(.sqlite_db)
+  on.exit(dbDisconnect(.sqlite_db))
 
   return(xs)
 
@@ -530,8 +530,9 @@ sqlite_removestb <- function(tb, db) {
 
 #' sqlite_uploadrdt wrapper on dbWriteTable
 #' id and id_unique - create [unique] index
-sqlite_uploadrdt <- function(dt, tb, db, id = NULL, id_unique = TRUE,
-                             overwrite = TRUE, append = FALSE, ...) {
+sqlite_uploadrdt <- function(
+  dt, tb, db, id = NULL, id_unique = TRUE, index_name = NULL,
+  overwrite = TRUE, append = FALSE, ...) {
 
   message("sqlite_uploadrdt: load table ", substitute(tb), " into ", substitute(db), " ...\n")
 
@@ -539,18 +540,54 @@ sqlite_uploadrdt <- function(dt, tb, db, id = NULL, id_unique = TRUE,
 
   .sqlite_db <- dbConnect(dbDriver("SQLite"), db)
 
-  xs <- dbWriteTable(conn = .sqlite_db, name = tb, value = dt,
-                     overwrite = overwrite, append = append, ...)
+  xs <- dbWriteTable(
+    conn = .sqlite_db, name = tb, value = dt,
+    overwrite = overwrite, append = append,
+    ...
+  )
 
   if ( !is.null(id) ) {
 
-    if ( ! all( id %in% colnames(dt) ) ) { stop(substitute(id),  " not in ", substitute(dt)) }
+    if ( !all(id %in% colnames(dt)) ) {
 
-    dbGetQuery(conn = .sqlite_db, statement = 'create ' %+% ifelse(id_unique, 'unique ', ' ') %+%
-                 'index idx_' %+% tb %+% ' on ' %+% tb %+% '(' %+% paste0(id, collapse = ', ') %+% ');')
+      stop(substitute(id),  " not in ", substitute(dt))
+
+    }
+
+    if ( is.null(index_name) ) {
+
+      index_name = paste0("idx", "_", tb)
+
+    }
+
+    if ( is.null(dbGetQuery(
+      conn = .sqlite_db, statement = paste0("pragma index_info('", index_name, "')")
+    )) ) {
+
+      message("sqlite_uploadrdt: create index ", index_name, ".\n")
+
+      dbGetQuery(
+        conn = .sqlite_db,
+        statement = paste0(
+          'create ', ifelse(id_unique, 'unique ', ' '),
+          'index ', index_name, ' on ', tb, '(', paste0(id, collapse = ', '), ');'
+        )
+      )
+
+    } else {
+
+      message("sqlite_uploadrdt: reindex ", index_name, " since index already exists.\n")
+
+      dbGetQuery(
+        conn = .sqlite_db, statement = paste0('reindex ', index_name, ';')
+      )
+
+    }
+
   }
 
-  dbDisconnect(.sqlite_db)
+  # on case any error stops call
+  on.exit(dbDisconnect(.sqlite_db))
 
   .ptd <- proc.time() - .ptc
 
@@ -559,13 +596,16 @@ sqlite_uploadrdt <- function(dt, tb, db, id = NULL, id_unique = TRUE,
   message("sqlite_uploadrdt: load table ", substitute(tb), " into ", substitute(db), " ... done.\n")
 
   return(xs)
+
 }
 
 #' sqlite_refreshtb
 #' refreshtb will update value when primary key exist,
 #' and also insert new row when primary key not exist.
-sqlite_refreshtb <- function(dt, tb, id, db, dt_coltp = NULL, id_unique = TRUE,
-                             batch_size = 10000) {
+sqlite_refreshtb <- function(
+  dt, tb, id, db, dt_coltp = NULL, id_unique = TRUE,
+  batch_size = 10000L
+) {
 
   message("refresh table: ", substitute(tb), " in ", substitute(db), " ...\n")
 
@@ -636,7 +676,7 @@ sqlite_refreshtb <- function(dt, tb, id, db, dt_coltp = NULL, id_unique = TRUE,
     .idx <- min(.idx + batch_size, .nn)
   }
 
-  RSQLite::dbDisconnect(conn = .sqlite_db)
+  on.exit(RSQLite::dbDisconnect(conn = .sqlite_db))
 
   .ptd <- proc.time() - .ptc
 
@@ -735,7 +775,7 @@ sqlite_selectidx <- function(tb, db, id, id_value) {
   xs <- dbGetQuery(.sqlite_db, "select * from " %+% tb %+% " where " %+% paste(id, "'" %+% gsub("'", "''", id_value) %+% "'", sep = " = ", collapse = " and ") %+% ";") %>%
     `class<-`(c("data.table", "data.frame"))
 
-  dbDisconnect(.sqlite_db)
+  on.exit(dbDisconnect(.sqlite_db))
 
   return(xs)
 

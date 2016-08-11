@@ -6,7 +6,7 @@
 id and id_unique - create [unique] index}
 \usage{
 sqlite_uploadrdt(dt, tb, db, id = NULL, id_unique = TRUE,
-  overwrite = TRUE, append = FALSE, ...)
+  index_name = NULL, overwrite = TRUE, append = FALSE, ...)
 }
 \description{
 sqlite_uploadrdt wrapper on dbWriteTable
