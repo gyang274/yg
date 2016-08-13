@@ -1,10 +1,10 @@
 Package: yg
 Type: Package
-Title: File based database management.
+Title: File based database management. And, some math.
 Version: 0.1.0
 Author: Guang Yang
 Maintainer: Guang Yang <gyang274@gmail.com>
-Description: File based database management.
+Description: File based database management. And, some math.
 License: MIT + file LICENSE
 LazyData: TRUE
 Depends:

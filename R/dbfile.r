@@ -113,7 +113,7 @@ create_load_dbfile_disk <- function(qy, db, fn, rfrh, qs, db_disk) {
 
 #' load_dbfile
 #' load dbfile into memory w. check on file.info intact
-load_dbfile <- function(fn, colname, coltype, waitime = 10, maxtime = 600,
+load_dbfile <- function(fn, colname, coltype, waitime = 10L, maxtime = 60L,
                         sep = '\t', header = FALSE, skip = 0L, nrows = -1L,
                         stringsAsFactors = FALSE) {
 

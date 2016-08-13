@@ -5,7 +5,7 @@
 \title{load_dbfile
 load dbfile into memory w. check on file.info intact}
 \usage{
-load_dbfile(fn, colname, coltype, waitime = 10, maxtime = 600,
+load_dbfile(fn, colname, coltype, waitime = 10L, maxtime = 60L,
   sep = "\\t", header = FALSE, skip = 0L, nrows = -1L,
   stringsAsFactors = FALSE)
 }
