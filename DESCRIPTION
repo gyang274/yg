@@ -7,11 +7,8 @@ Maintainer: Guang Yang <gyang274@gmail.com>
 Description: File based database management. And, some math.
 License: MIT + file LICENSE
 LazyData: TRUE
-Depends:
-    data.table,
-    magrittr,
-    RSQLite,
-    RODBC
+Depends: data.table, magrittr,
+    RSQLite, RODBC
 URL: https://github.com/gyang274/yg
 BugReports: https://github.com/gyang274/yg/issues
 RoxygenNote: 5.0.1
