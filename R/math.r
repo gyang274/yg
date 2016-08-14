@@ -54,6 +54,7 @@ calculate_proj_point_line <- function(x1, x2, y1, y2, z1, z2) {
 #' @description
 #' calculate angle of a point x (x1, x2) to a segement y (y1, y2) - z (z1, z2)
 #'  angle is equivalent as the angle spanned at vertex x at triangle y - x - z
+#'  angle is defined as cosine(vXY, vXZ) and vXY is X -> Y: vector from X to Y
 #' an often use case:
 #'  determine whether x_proj_yzLine within ygSegment or not
 #'  x_proj_yzLine within ygSegment if both angle x-y-z > 0 and x-z-y > 0
