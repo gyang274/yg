@@ -532,7 +532,8 @@ sqlite_removestb <- function(tb, db) {
 #' id and id_unique - create [unique] index
 sqlite_uploadrdt <- function(
   dt, tb, db, id = NULL, id_unique = TRUE, index_name = NULL,
-  overwrite = TRUE, append = FALSE, ...) {
+  overwrite = TRUE, append = FALSE, ...
+) {
 
   message("sqlite_uploadrdt: load table ", substitute(tb), " into ", substitute(db), " ...\n")
 
@@ -596,6 +597,42 @@ sqlite_uploadrdt <- function(
   message("sqlite_uploadrdt: load table ", substitute(tb), " into ", substitute(db), " ... done.\n")
 
   return(xs)
+
+}
+
+#' sqlite_uploadrdt_dtlist
+#' @description
+#' upload a list contains multiple dt into sqlite
+#' a wrapper over yg::sqlite_uploadrdt()
+#' TODO: (should) extend to list of list of dt[?]
+#' TODO: (should) extend id into idlist [?] - [x]
+sqlite_uploadrdt_dtlist <- function(
+  dtlist, tblist, db, id = NULL,
+  id_unique = TRUE, index_name = NULL,
+  overwrite = TRUE, append = FALSE, ...
+) {
+
+  message("sqlite_uploadrdt_dtlist: load table ", substitute(tb), " into ", substitute(db), " ...\n")
+
+  .ptc <- proc.time()
+
+  dtname <- names(dtlist)
+
+  if ( is.null(tblist) ) tblist <- dtname
+
+  if ( length(tblist) != length(dtlist) ) stop("sqlite_uploadrdt_dtlist: length(tblist) != length(dtlist)?\n")
+
+  eval(parse(text = paste0("
+    sqlite_uploadrdt(dt = dtlist[[", dtname, "]], tb =", tblist, ", db = db, id = id, id_unique = id_unique, index_name = index_name, overwrite = overwrite, append = append, ...)"
+  )))
+
+  .ptd <- proc.time() - .ptc
+
+  message("sqlite_uploadrdt: load table ", substitute(tb), " consumes ", .ptd[3], " seconds.\n")
+
+  message("sqlite_uploadrdt: load table ", substitute(tb), " into ", substitute(db), " ... done.\n")
+
+  return(NULL)
 
 }
 
