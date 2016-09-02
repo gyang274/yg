@@ -612,7 +612,7 @@ sqlite_uploadrdt_dtlist <- function(
   overwrite = TRUE, append = FALSE, ...
 ) {
 
-  message("sqlite_uploadrdt_dtlist: load table ", substitute(tb), " into ", substitute(db), " ...\n")
+  message("sqlite_uploadrdt_dtlist: load table list into ", substitute(db), " ...\n")
 
   .ptc <- proc.time()
 
@@ -628,9 +628,9 @@ sqlite_uploadrdt_dtlist <- function(
 
   .ptd <- proc.time() - .ptc
 
-  message("sqlite_uploadrdt: load table ", substitute(tb), " consumes ", .ptd[3], " seconds.\n")
+  message("sqlite_uploadrdt_dtlist: load table list consumes ", .ptd[3], " seconds.\n")
 
-  message("sqlite_uploadrdt: load table ", substitute(tb), " into ", substitute(db), " ... done.\n")
+  message("sqlite_uploadrdt_dtlist: load table list into ", substitute(db), " ... done.\n")
 
   return(NULL)
 
