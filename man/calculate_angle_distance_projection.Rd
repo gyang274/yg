@@ -38,7 +38,8 @@ calculate proj from a point x (x1, x2) to a line of y (y1, y2) - z (z1, z2)
  which minimize euclidean dist(x, p), p argmin(dist(x, p), p on line y - z)
 
 calculate angle of a point x (x1, x2) to a segement y (y1, y2) - z (z1, z2)
- angle is equivalent as the angle spanned at vertex x at triangle y - x - z
+ angle is defined as angleYXZ = cosine(vXY, vXZ) cosine of angle spanned at
+ vertex X in triangle YXZ, and vXY is X -> Y: vector from X to Y.
 an often use case:
  determine whether x_proj_yzLine within ygSegment or not
  x_proj_yzLine within ygSegment if both angle x-y-z > 0 and x-z-y > 0
