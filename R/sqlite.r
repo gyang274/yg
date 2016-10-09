@@ -78,13 +78,13 @@ dtFillNA <- function(dt, fillNA = 0, fillNA_I = 0L, fillNA_C = "",
 
     message("fillNA on column index: ", jcolidx, " ...\n")
 
-    if ( all(jcolidx < dim(dt)[2]) ) {
+    if ( all(jcolidx <= dim(dt)[2L]) ) {
 
       # jcolidx <- jcolidx
 
     } else {
 
-      stop("fillNA on column index: ", paste(jcolidx, sep = ", "), " not all in dt column index: ", paste(dim(dt)[2]  , sep = ", "), "...\n")
+      stop("fillNA on column index: ", paste(jcolidx, sep = ", "), " not all in dt column index: ", paste(dim(dt)[2L]  , sep = ", "), "...\n")
 
     }
 
