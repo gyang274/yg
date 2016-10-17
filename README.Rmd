@@ -154,12 +154,12 @@ sqodbc_dblist_with_winAuth <-function() {
 
 # list all tables in database in sql-server
 sqodbc_executeqy(
-  qy = "select * from INFORMATION_SCHEMA.TABLES", db = sqodbc_dblist
+  qy = "select * from INFORMATION_SCHEMA.TABLES", db = sqodbc_dblist()
 )
 
 # use windows authentication for connection
 sqodbc_executeqy(
-  qy = "select * from INFORMATION_SCHEMA.TABLES", db = sqodbc_dblist_with_winAuth
+  qy = "select * from INFORMATION_SCHEMA.TABLES", db = sqodbc_dblist_with_winAuth()
 )
 ```
 
