@@ -2,17 +2,18 @@
 % Please edit documentation in R/sqlite.r
 \name{sqlite_executeqs}
 \alias{sqlite_executeqs}
-\title{sqlite_executeqs wrapper on sqlite3
-wrapper on sqlite3 command line shell command
-chooses no wrapper on the dbGetQuery function
-because of dbGetQuery can not handle mutliple line query with "\n"}
+\title{sqlite_executeqs}
 \usage{
 sqlite_executeqs(qs, db)
 }
 \description{
-sqlite_executeqs wrapper on sqlite3
+wrapper on sqlite3
+}
+\details{
 wrapper on sqlite3 command line shell command
-chooses no wrapper on the dbGetQuery function
-because of dbGetQuery can not handle mutliple line query with "\n"
+
+ chooses no wrapper on the dbGetQuery function
+
+ because of dbGetQuery can not handle mutliple line query with "\n"
 }
 

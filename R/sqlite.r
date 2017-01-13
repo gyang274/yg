@@ -449,10 +449,21 @@ det_col_type <- function(x) {
 #------------------------------------------------------------------------------#
 #---------------------- wrapper on rsqlite sql functions ----------------------#
 #------------------------------------------------------------------------------#
-#' sqlite_executeqs wrapper on sqlite3
-#' wrapper on sqlite3 command line shell command
-#' chooses no wrapper on the dbGetQuery function
-#' because of dbGetQuery can not handle mutliple line query with "\n"
+
+#' sqlite_executeqs
+#'
+#' @description
+#'
+#'  wrapper on sqlite3
+#'
+#' @details
+#'
+#'  wrapper on sqlite3 command line shell command
+#'
+#'  chooses no wrapper on the dbGetQuery function
+#'
+#'  because of dbGetQuery can not handle mutliple line query with "\n"
+#'
 sqlite_executeqs <- function(qs, db) {
 
   qs_tmpt_file <- getwd() %+% gsub("\\\\", "/", tempfile(pattern = "qs", tmpdir = "", fileext = ".sql"))
@@ -471,11 +482,11 @@ sqlite_executeqs <- function(qs, db) {
 #' sqlite_executeqy wrapper on dbGetQuery
 sqlite_executeqy <- function(qy, db, ...) {
 
-  .sqlite_db <- dbConnect(dbDriver("SQLite"), db)
+  .sqlite_db <- DBI::dbConnect(DBI::dbDriver("SQLite"), db)
 
-  xs <- dbGetQuery(.sqlite_db, qy, ...)
+  xs <- DBI::dbGetQuery(.sqlite_db, qy, ...)
 
-  on.exit(dbDisconnect(.sqlite_db))
+  on.exit(DBI::dbDisconnect(.sqlite_db))
 
   return(xs)
 }
@@ -483,11 +494,11 @@ sqlite_executeqy <- function(qy, db, ...) {
 #' sqlite_existsqtb wrapper on dbExistsTable
 sqlite_existsqtb <- function(tb, db) {
 
-  .sqlite_db <- dbConnect(dbDriver("SQLite"), db)
+  .sqlite_db <- DBI::dbConnect(DBI::dbDriver("SQLite"), db)
 
-  xs <- dbExistsTable(.sqlite_db, tb)
+  xs <- DBI::dbExistsTable(.sqlite_db, tb)
 
-  on.exit(dbDisconnect(.sqlite_db))
+  on.exit(DBI::dbDisconnect(.sqlite_db))
 
   return(xs)
 }
@@ -499,12 +510,12 @@ sqlite_fetchsqtb <- function(tb, db, ...) {
 
   .ptc <- proc.time()
 
-  .sqlite_db <- dbConnect(dbDriver("SQLite"), db)
+  .sqlite_db <- DBI::dbConnect(DBI::dbDriver("SQLite"), db)
 
-  dt <- dbReadTable(.sqlite_db, tb, ...) %>%
+  dt <- DBI::dbReadTable(.sqlite_db, tb, ...) %>%
     `class<-`(c("data.table", "data.frame"))
 
-  on.exit(dbDisconnect(.sqlite_db))
+  on.exit(DBI::dbDisconnect(.sqlite_db))
 
   .ptd <- proc.time() - .ptc
 
@@ -518,11 +529,11 @@ sqlite_fetchsqtb <- function(tb, db, ...) {
 #' sqlite_removestb wrapper on dbRemoveTable
 sqlite_removestb <- function(tb, db) {
 
-  .sqlite_db <- dbConnect(dbDriver("SQLite"), db)
+  .sqlite_db <- DBI::dbConnect(DBI::dbDriver("SQLite"), db)
 
-  xs <- dbRemoveTable(.sqlite_db, tb)
+  xs <- DBI::dbRemoveTable(.sqlite_db, tb)
 
-  on.exit(dbDisconnect(.sqlite_db))
+  on.exit(DBI::dbDisconnect(.sqlite_db))
 
   return(xs)
 
@@ -539,9 +550,9 @@ sqlite_uploadrdt <- function(
 
   .ptc <- proc.time()
 
-  .sqlite_db <- dbConnect(dbDriver("SQLite"), db)
+  .sqlite_db <- DBI::dbConnect(DBI::dbDriver("SQLite"), db)
 
-  xs <- dbWriteTable(
+  xs <- DBI::dbWriteTable(
     conn = .sqlite_db, name = tb, value = dt,
     overwrite = overwrite, append = append,
     ...
@@ -561,13 +572,13 @@ sqlite_uploadrdt <- function(
 
     }
 
-    if ( is.null(dbGetQuery(
+    if ( is.null(DBI::dbGetQuery(
       conn = .sqlite_db, statement = paste0("pragma index_info('", index_name, "')")
     )) ) {
 
       message("sqlite_uploadrdt: create index ", index_name, ".\n")
 
-      dbGetQuery(
+      DBI::dbGetQuery(
         conn = .sqlite_db,
         statement = paste0(
           'create ', ifelse(id_unique, 'unique ', ' '),
@@ -579,7 +590,7 @@ sqlite_uploadrdt <- function(
 
       message("sqlite_uploadrdt: reindex ", index_name, " since index already exists.\n")
 
-      dbGetQuery(
+      DBI::dbGetQuery(
         conn = .sqlite_db, statement = paste0('reindex ', index_name, ';')
       )
 
@@ -588,7 +599,7 @@ sqlite_uploadrdt <- function(
   }
 
   # on case any error stops call
-  on.exit(dbDisconnect(.sqlite_db))
+  on.exit(DBI::dbDisconnect(.sqlite_db))
 
   .ptd <- proc.time() - .ptc
 
@@ -650,9 +661,9 @@ sqlite_refreshtb <- function(
 
   .nn  <- nrow(dt)
 
-  .sqlite_db <- RSQLite::dbConnect(dbDriver("SQLite"), db)
+  .sqlite_db <- DBI::dbConnect(DBI::dbDriver("SQLite"), db)
 
-  if ( ! (tb %in% RSQLite::dbListTables(.sqlite_db)) ) {
+  if ( ! (tb %in% DBI::dbListTables(.sqlite_db)) ) {
 
     message("sqlite_refreshtb: create ", substitute(tb), " not in ", substitute(db), " ... \n")
 
@@ -679,7 +690,7 @@ sqlite_refreshtb <- function(
 
   }
 
-  .nm  <- RSQLite::dbListFields(.sqlite_db, tb)
+  .nm  <- DBI::dbListFields(.sqlite_db, tb)
 
   if ( ! all(colnames(dt) == .nm) ) {
 
@@ -713,7 +724,7 @@ sqlite_refreshtb <- function(
     .idx <- min(.idx + batch_size, .nn)
   }
 
-  on.exit(RSQLite::dbDisconnect(conn = .sqlite_db))
+  on.exit(DBI::dbDisconnect(conn = .sqlite_db))
 
   .ptd <- proc.time() - .ptc
 
@@ -744,12 +755,12 @@ sqlite_subsetidx <- function(dt, tb, db, id, batch_size = 10000,
   # dt_idx <- eval(substitute(dt %>% dplyr::select(.idx), list(.idx = parse(text = id)))) %>% unique
   dt_idx <- eval(substitute(dt %>% dplyr::select(.idx), list(.idx = parse(text = id)))) %>% unique %>% unlist(use.names = FALSE)
 
-  .sqlite_db <- dbConnect(dbDriver("SQLite"), db)
+  .sqlite_db <- DBI::dbConnect(DBI::dbDriver("SQLite"), db)
 
   # .nn <- nrow(dt_idx)
   .nn <- length(dt_idx)
 
-  .nm <- dbListFields(.sqlite_db, tb)
+  .nm <- DBI::dbListFields(.sqlite_db, tb)
 
   # limit 1 is potential bug when empty table
   # fixit use dbGetQuery(.sqlite_db, 'PRAGMA table_info("' %+% tb %+% '")')
@@ -758,7 +769,7 @@ sqlite_subsetidx <- function(dt, tb, db, id, batch_size = 10000,
   # dt_rtn <- matrix(NA_character_, .nn, length(.nm)) %>% data.table %>% `colnames<-`(.nm)
 
   # fix attempt 1 - limit to handle type of int and text
-  .nc <- dbGetQuery(.sqlite_db, 'PRAGMA table_info("' %+% tb %+% '")') %>% `[[`("type")
+  .nc <- DBI::dbGetQuery(.sqlite_db, 'PRAGMA table_info("' %+% tb %+% '")') %>% `[[`("type")
 
   dt_rtn <- eval(parse(text = "data.table(" %+% paste0(
     paste0(.nm %+% " = rep(" %+% ifelse(.nc == "int", "NA_integer_", "NA_character_") %+% " , " %+% .nn %+% ")" ),
@@ -777,7 +788,7 @@ sqlite_subsetidx <- function(dt, tb, db, id, batch_size = 10000,
     # double to escape ' when query against sqlite sql
     .qy <- 'select * from ' %+% tb %+% ' where ' %+% id %+% ' in ("' %+% paste0(gsub("'", "''", .xx), collapse = '", "') %+% '")'
 
-    dt_rtn_chunk <- RSQLite::dbGetQuery(conn = .sqlite_db, statement = .qy)
+    dt_rtn_chunk <- DBI::dbGetQuery(conn = .sqlite_db, statement = .qy)
 
     dt_rtn[(.jk + 1):(.jk + nrow(dt_rtn_chunk)), ] <- dt_rtn_chunk
 
@@ -806,13 +817,13 @@ sqlite_subsetidx <- function(dt, tb, db, id, batch_size = 10000,
 #' select * from tb in db where id = id_value
 sqlite_selectidx <- function(tb, db, id, id_value) {
 
-  .sqlite_db <- dbConnect(dbDriver("SQLite"), db)
+  .sqlite_db <- DBI::dbConnect(DBI::dbDriver("SQLite"), db)
 
   # double to escape ' when query against sqlite sql
-  xs <- dbGetQuery(.sqlite_db, "select * from " %+% tb %+% " where " %+% paste(id, "'" %+% gsub("'", "''", id_value) %+% "'", sep = " = ", collapse = " and ") %+% ";") %>%
+  xs <- DBI::dbGetQuery(.sqlite_db, "select * from " %+% tb %+% " where " %+% paste(id, "'" %+% gsub("'", "''", id_value) %+% "'", sep = " = ", collapse = " and ") %+% ";") %>%
     `class<-`(c("data.table", "data.frame"))
 
-  on.exit(dbDisconnect(.sqlite_db))
+  on.exit(DBI::dbDisconnect(.sqlite_db))
 
   return(xs)
 
@@ -835,30 +846,34 @@ sqodbc_createcnn <- function(db) {
 
   winAuth <- db[["winAuth"]] %|% FALSE
 
+  db[["drv"]] <- db[["drv"]] %|% "ODBC Driver 11 for SQL Server"
+
   if ( winAuth ) {
 
     xc <- RODBC::odbcDriverConnect(
-      connection =
-        "driver=ODBC Driver 11 for SQL Server;" %+%
-        "server="   %+% db[["srv"]] %+% ";" %+%
-        "database=" %+% db[["dbn"]] %+% ";" %+%
+      connection = paste0(
+        "driver="   , db[["drv"]], ";",
+        "server="   , db[["srv"]], ";",
+        "database=" , db[["dbn"]], ";",
         "trusted_connection=yes"
+      )
     )
 
   } else {
 
     xc <- RODBC::odbcDriverConnect(
-      connection =
-        "driver=ODBC Driver 11 for SQL Server;" %+%
-        "server="   %+% db[["srv"]] %+% ";" %+%
-        "uid="      %+% db[["usr"]] %+% ";" %+%
-        "pwd="      %+% db[["pwd"]] %+% ";" %+%
-        "database=" %+% db[["dbn"]]
+      connection = paste0(
+        "driver="   , db[["drv"]], ";",
+        "server="   , db[["srv"]], ";",
+        "uid="      , db[["usr"]], ";",
+        "pwd="      , db[["pwd"]], ";",
+        "database=" , db[["dbn"]]
+      )
     )
 
   }
 
-  return( xc )
+  return(xc)
 
 }
 
@@ -874,7 +889,7 @@ sqodbc_executeqy <- function(qy, db, ...) {
 
   x <- RODBC::sqlQuery(channel = .sql, query = qy, ...)
 
-  odbcClose(.sql)
+  RODBC::odbcClose(.sql)
 
   if ( ! (is.data.frame(x) || length(x) == 0 || x == "No Data") ) {
 
@@ -921,9 +936,9 @@ sqodbc_existsqtb <- function(tb, db, tb_type = c("table", "view"), ...) {
 
   .sql <- sqodbc_createcnn(db)
 
-  xs <- sqlTables(.sql) %>% `class<-`(c("data.table", "data.frame"))
+  xs <- RODBC::sqlTables(.sql) %>% `class<-`(c("data.table", "data.frame"))
 
-  odbcClose(.sql)
+  RODBC::odbcClose(.sql)
 
   names(xs) <- tolower(names(xs))
 
@@ -960,9 +975,9 @@ sqodbc_fetchsqtb <- function(tb, db, ...) {
 
   .sql <- sqodbc_createcnn(db)
 
-  x <- sqlFetch(channel = .sql, sqtable = tb, ...)
+  x <- RODBC::sqlFetch(channel = .sql, sqtable = tb, ...)
 
-  odbcClose(.sql)
+  RODBC::odbcClose(.sql)
 
   if ( !is.data.frame(x) && length(x) != 0 ) {
 
@@ -1001,7 +1016,7 @@ sqodbc_uploadrdt <- function(dt, tb, db, id = NULL, id_unique = TRUE,
 
     if ( e ) { sqlDrop(channel = .sql, sqtable = tb) }
 
-    x <- sqlSave(channel = .sql, dat = dt, tablename = tb, rownames = rownames,
+    x <- RODBC::sqlSave(channel = .sql, dat = dt, tablename = tb, rownames = rownames,
                  colnames = colnames, safer = safer, fast = fast, ...)
 
     if ( !is.null(id) ) {
@@ -1012,7 +1027,7 @@ sqodbc_uploadrdt <- function(dt, tb, db, id = NULL, id_unique = TRUE,
                    'index idx_' %+% gsub("[[:punct:]]", "", tb) %+% ' on ' %+% tb %+% '(' %+% paste0(id, collapse = ', ') %+% ');')
     }
 
-    odbcClose(.sql)
+    RODBC::odbcClose(.sql)
 
     if ( x != 1 ) {
 
@@ -1038,13 +1053,13 @@ sqodbc_removestb <- function(tb, db) {
 
   .ptc <- proc.time()
 
-  if ( yg::sqodbc_existsqtb(tb, db) ) {
+  if ( sqodbc_existsqtb(tb, db) ) {
 
     .sql <- sqodbc_createcnn(db)
 
     x <- RODBC::sqlDrop(channel = .sql, sqtable = tb, error = FALSE)
 
-    odbcClose(.sql)
+    RODBC::odbcClose(.sql)
 
   } else {
 
@@ -1089,9 +1104,9 @@ sqodbc_updatestb <- function(dt, tb, id, db, ...) {
 
   .sql <- sqodbc_createcnn(db)
 
-  x <- sqlUpdate(channel = .sql, dat = dt, tablename = tb, index = id, ...)
+  x <- RODBC::sqlUpdate(channel = .sql, dat = dt, tablename = tb, index = id, ...)
 
-  odbcClose(.sql)
+  RODBC::odbcClose(.sql)
 
   if ( x != 1 ) {
 
@@ -1123,9 +1138,9 @@ sqodbc_refreshtb <- function(dt, tb, id, db, batch_size = 10000) {
 
   .sql <- sqodbc_createcnn(db)
 
-  .nm  <- sqlColumns(.sql, tb) %>% `[[`("COLUMN_NAME")
+  .nm  <- RODBC::sqlColumns(.sql, tb) %>% `[[`("COLUMN_NAME")
 
-  odbcClose(.sql)
+  RODBC::odbcClose(.sql)
 
   if ( ! all(colnames(dt) == .nm) ) {
 
@@ -1221,6 +1236,8 @@ sqodbc_subsetidx <- function(dt, tb, db, id, batch_size = 10000,
     message("sqlite_subsetidx: bulk-match ", .ik, " rows ...\n")
   }
 
+  RODBC::odbcClose(.sql)
+
   eval(parse(text = "dt_rtn <- rbind(" %+% paste("dt_rtn_chunk", 0:(.kk - 1), sep = "_", collapse = ", ") %+% ")"))
 
   dt_rtn <- dt_rtn %>% `class<-`(c("data.table", "data.frame"))
@@ -1247,7 +1264,7 @@ sqodbc_selectidx <- function(tb, db, id, id_value) {
   x <- RODBC::sqlQuery(channel = .sql, query = "select * from " %+% tb %+% " where " %+% paste(id, "'" %+% gsub("'", "''", id_value) %+% "'", sep = " = ", collapse = " and ") %+% ";") %>%
     `class<-`(c("data.table", "data.frame"))
 
-  odbcClose(.sql)
+  RODBC::odbcClose(.sql)
 
   return(x)
 
