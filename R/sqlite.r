@@ -51,10 +51,10 @@ CJ.dt <- function(X, Y) {
 
   k = NULL
 
-  X = X[, c(k = 1, .SD)]
+  X = X[, c(k = 1L, .SD)]
   setkey(X, k)
 
-  Y = Y[, c(k = 1, .SD)]
+  Y = Y[, c(k = 1L, .SD)]
   setkey(Y, NULL)
 
   return( X[Y, allow.cartesian=TRUE][, k := NULL][] )
